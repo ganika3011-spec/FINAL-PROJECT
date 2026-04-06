@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Account',
+    "Vendor",
     
 ]
 AUTH_USER_MODEL = 'Account.User'

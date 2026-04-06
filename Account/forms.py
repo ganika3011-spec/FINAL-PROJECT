@@ -1,5 +1,6 @@
 from django import forms
 from .models import User,UserProfile
+from Vendor.models import Vendor
 
 class UserForm(forms.ModelForm):
     password=forms.CharField(widget=forms.PasswordInput())
@@ -15,3 +16,5 @@ class UserForm(forms.ModelForm):
 
         if password != confirm_password:
             raise forms.ValidationError("Password does not match!")
+
+

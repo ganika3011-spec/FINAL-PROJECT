@@ -1,8 +1,8 @@
 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                                     {% if messages %}
                                                     {% for message in messages %}
-                                                    <div class="alert alert-{{messages.tags}} show-notification" role="alert">
-                                                        <strong>{{message}}</strong>  
+                                                    <div class="alert alert-success show-notification" role="alert">
+                                                        {{ message }}   
                                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                                             <span aria-hidden="true">&times;</span>
                                                         </button>    

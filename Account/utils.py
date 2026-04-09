@@ -19,12 +19,11 @@ def detect_user_role(user):
     # Default redirect if no role or invalid role
     return 'customerdashboard'
 
-def send_verification_email(request, user):
+def send_verification_email(request, user, mail_subject, email_template):
     """Send account verification email. Handles email errors gracefully."""
     try:
         current_site = get_current_site(request)
-        mail_subject = 'Please, Activate your account.'
-        message = render_to_string('accounts/emails/acc_active_email.html', {
+        message = render_to_string(email_template, {
             'user': user,
             'domain': current_site.domain,
             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
@@ -44,3 +43,4 @@ def send_verification_email(request, user):
         logger.error(f"Failed to send verification email to {user.email}: {str(e)}")
         # Don't crash the registration process if email fails
         # In production, you might want to handle this differently    
+

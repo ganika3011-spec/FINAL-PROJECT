@@ -8,6 +8,9 @@ from Vendor.forms import VendorForm
 from .utils import detect_user_role
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.core.exceptions import PermissionDenied
+from .utils import send_verification_email
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
 
 
 
@@ -33,7 +36,7 @@ def check_role_customer(user):
 def registerUser(request):
     if request.user.is_authenticated:
             messages.info(request,"You are already logged in!")
-            return redirect('dashboard')
+            return redirect('myAccount')
     elif request.method=='POST':
         print(request.POST)
         form= UserForm(request.POST)
@@ -63,6 +66,8 @@ def registerUser(request):
             )
             user.Role='Customer'
             user.save()
+
+            send_verification_email(request,user)
             messages.success(request,"Your account has been registered successfully!")
             return redirect('registerUser')
         else:
@@ -106,6 +111,7 @@ def registerRestaurant(request):
             vendor.user_profile=user_profile
             vendor.save()
 
+            send_verification_email(request,user)
             messages.success(request,"Your account has been registered successfully! please wait for the admin approval.")
             return redirect('registerRestaurant')
         else:
@@ -119,6 +125,24 @@ def registerRestaurant(request):
         'v_form':v_form,
     }
     return render(request, 'accounts/register-restaurant.html',context)
+
+def activate(request, uidb64, token):
+    """Activate user account via email verification link"""
+    
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, 'Congratulations! Your account has been activated.')
+        return redirect('login')
+    else:
+        messages.error(request, 'Invalid activation link.')
+        return redirect('registerUser')
 
 def login(request):
         if request.user.is_authenticated:

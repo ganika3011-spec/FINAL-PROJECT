@@ -1,0 +1,50 @@
+
+{% autoescape off %}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; }
+        .content { padding: 20px 0; }
+        .button { 
+            display: inline-block; 
+            padding: 12px 30px; 
+            background-color: #dc3545; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .footer { color: #999; font-size: 12px; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to FoodOnline!</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{ user.username }},</p>
+            
+            {% if is_approved %}
+            <p>Congratulations! Your vendor account has been approved by our admin team. You can now log in and start managing your products and orders.</p>
+            {% else %}
+            <p>We regret to inform you that your vendor account has been disapproved by our
+                
+            admin team. If you have any questions or believe this is a mistake, please contact our support team for further assistance.</p>
+            {% endif %}
+            
+            
+        </div>
+        
+        <div class="footer">
+            
+            <p>&copy; 2026 FoodOnline. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+{% endautoescape %}

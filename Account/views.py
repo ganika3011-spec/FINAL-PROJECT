@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.core.exceptions import PermissionDenied
 from .utils import send_verification_email
 from django.utils.http import urlsafe_base64_decode
+from Vendor.models import Vendor
 from django.contrib.auth.tokens import default_token_generator
 
 
@@ -65,7 +66,7 @@ def registerUser(request):
                 
                 password=password,
             )
-            user.Role='Customer'
+            user.Role=User.CUSTOMER
             user.save()
             
             mail_subject = 'Please, Activate your account.'
@@ -105,7 +106,7 @@ def registerRestaurant(request):
                 
                 password=password,
             )
-            user.Role='Restaurant'
+            user.Role=User.RESTAURANT
             user.save()
 
             vendor=v_form.save(commit=False)
@@ -186,6 +187,7 @@ def customerdashboard(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
 def restaurantdashboard(request):
+    
     return render(request, 'accounts/restaurantdashboard.html')
 
 

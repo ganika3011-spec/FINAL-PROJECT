@@ -8,11 +8,13 @@ from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)   
+from .models import User, UserProfile
+
 def detect_user_role(user):
     if user.is_authenticated:
-        if user.Role == 'Customer':
+        if user.Role == User.CUSTOMER:
             return 'customerdashboard'
-        elif user.Role == 'Restaurant':
+        elif user.Role == User.RESTAURANT:
             return 'restaurantdashboard'
         elif user.is_superadmin:
             return 'admin:index'
@@ -44,3 +46,22 @@ def send_verification_email(request, user, mail_subject, email_template):
         # Don't crash the registration process if email fails
         # In production, you might want to handle this differently    
 
+def send_notification(mail_subject, mail_template, context):
+    """Send notification email. Handles email errors gracefully."""
+    try:
+        
+        message = render_to_string(mail_template, context)
+        to_email = context.get('user').email
+        email = EmailMessage(
+            subject=mail_subject, 
+            body=message, 
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[to_email]
+        )
+        email.content_subtype = 'html'  # Set email as HTML
+        email.send()
+        logger.info(f"Notification email sent to {to_email}")
+    except Exception as e:
+        logger.error(f"Failed to send notification email to {context.get('user').email}: {str(e)}")
+        # Don't crash the process if email fails
+        # In production, you might want to handle this differently  

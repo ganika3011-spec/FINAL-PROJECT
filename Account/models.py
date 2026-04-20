@@ -39,18 +39,21 @@ class MyAccountManager(BaseUserManager):
     
 
 class User(AbstractBaseUser):
+    RESTAURANT = 'Restaurant'
+    CUSTOMER = 'Customer'
+    ADMIN = 'Admin'
 
     ROLE_CHOICES=(
-    ('Customer','Customer'),
-    ('Restaurant','Restaurant'),
-    ('Admin','Admin'), 
+    (CUSTOMER, 'Customer'),
+    (RESTAURANT, 'Restaurant'),
+    (ADMIN, 'Admin'), 
     )
     first_name=models.CharField(max_length=50)
     last_name=models.CharField(max_length=50)
     username=models.CharField(max_length=50,unique=True)
     email=models.EmailField(max_length=100,unique=True)
     phone_number=models.CharField(max_length=50)
-    Role= models.CharField(max_length=50,choices=ROLE_CHOICES,default='Customer')
+    Role= models.CharField(max_length=50,choices=ROLE_CHOICES,default=CUSTOMER)
 
     USERNAME_FIELD='email'
     REQUIRED_FIELDS=['username','first_name','last_name']
@@ -104,4 +107,7 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.email
+    
+    def full_address(self):
+        return f'{self.address_line_1} {self.address_line_2}'
     

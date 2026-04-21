@@ -105,6 +105,13 @@
 														</div>
                                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 															<div class="field-holder">
+																<label>Search Location (Type to get suggestions) *</label>
+																<input type="text" id="location-search" class="form-control" placeholder="Enter location name...">
+																<ul id="location-suggestions" class="location-suggestions-list"></ul>
+															</div>
+														</div>
+                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+															<div class="field-holder">
 																<label>Address*</label>
 																{{ profile_form.address }}
 															</div>
@@ -178,5 +185,130 @@
 			</div>
 		</div>
 		<!-- Main Section End -->
+
+<style>
+.location-suggestions-list {
+	list-style: none;
+	padding: 0;
+	margin: 5px 0;
+	border: 1px solid #ddd;
+	max-height: 200px;
+	overflow-y: auto;
+	display: none;
+	background: white;
+	z-index: 1000;
+	position: absolute;
+	width: 100%;
+	box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.location-suggestions-list.active {
+	display: block;
+}
+
+.location-suggestions-list li {
+	padding: 10px 15px;
+	cursor: pointer;
+	border-bottom: 1px solid #eee;
+	font-size: 13px;
+}
+
+.location-suggestions-list li:hover {
+	background-color: #f5f5f5;
+	color: #d73502;
+}
+
+#location-search {
+	position: relative;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const searchInput = document.getElementById('location-search');
+	const suggestionsList = document.getElementById('location-suggestions');
+	let debounceTimer;
+
+	// Nominatim API से suggestions लाने के लिए
+	searchInput.addEventListener('input', function() {
+		clearTimeout(debounceTimer);
+		const query = this.value.trim();
+
+		if (query.length < 3) {
+			suggestionsList.innerHTML = '';
+			suggestionsList.classList.remove('active');
+			return;
+		}
+
+		debounceTimer = setTimeout(() => {
+			fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
+				.then(response => response.json())
+				.then(data => {
+					suggestionsList.innerHTML = '';
+					if (data.length > 0) {
+						data.forEach(location => {
+							const li = document.createElement('li');
+							li.textContent = location.display_name;
+							li.onclick = () => selectLocation(location);
+							suggestionsList.appendChild(li);
+						});
+						suggestionsList.classList.add('active');
+					}
+				})
+				.catch(error => console.error('Error fetching suggestions:', error));
+		}, 300);
+	});
+
+	// Location select करने पर details fetch करना
+	function selectLocation(location) {
+		const lat = location.lat;
+		const lon = location.lon;
+		const displayName = location.display_name;
+
+		// Address भरना
+		document.querySelector('[name="address"]').value = displayName;
+
+		// Reverse geocoding से विस्तृत जानकारी लाना
+		fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+			.then(response => response.json())
+			.then(data => {
+				const address = data.address || {};
+
+				// City fill करना
+				const city = address.city || address.town || address.village || '';
+				document.querySelector('[name="city"]').value = city;
+
+				// Country fill करना
+				const country = address.country || '';
+				document.querySelector('[name="country"]').value = country;
+
+				// State fill करना (जहां उपलब्ध हो)
+				const state = address.state || address.region || '';
+				document.querySelector('[name="state"]').value = state;
+
+				// Postcode/Pin Code fill करना
+				const postcode = address.postcode || '';
+				document.querySelector('[name="pin_code"]').value = postcode;
+
+				// Latitude fill करना
+				document.querySelector('[name="latitude"]').value = lat;
+
+				// Longitude fill करना
+				document.querySelector('[name="longitude"]').value = lon;
+
+				suggestionsList.innerHTML = '';
+				suggestionsList.classList.remove('active');
+			})
+			.catch(error => console.error('Error fetching details:', error));
+	}
+
+	// Suggestions को बंद करने के लिए (जब कहीं और click हो)
+	document.addEventListener('click', function(e) {
+		if (e.target !== searchInput) {
+			suggestionsList.classList.remove('active');
+		}
+	});
+});
+</script>
 
 {% endblock %}

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'Account',
     "Vendor",
+    "menu",
     
 ]
 AUTH_USER_MODEL = 'Account.User'

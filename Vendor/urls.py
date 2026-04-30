@@ -10,7 +10,7 @@ urlpatterns = [
     path("menu/category/add/", views.add_category, name="add_category"),
     path("menu/category/edit/<int:pk>/", views.edit_category, name="edit_category"),
     path("menu/category/delete/<int:pk>/", views.delete_category, name="delete_category"),
-    # path("menu/food/add/", views.add_food, name="add_food"),
-    # path("menu/food/edit/<int:pk>/", views.edit_food, name="edit_food"),
-    # path("menu/food/delete/<int:pk>/", views.delete_food, name="delete_food"),  
+    path("menu/food/add/", views.add_food, name="add_food"),
+    path("menu/food/edit/<int:pk>/", views.edit_food, name="edit_food"),
+    path("menu/food/delete/<int:pk>/", views.delete_food, name="delete_food"),  
 ]

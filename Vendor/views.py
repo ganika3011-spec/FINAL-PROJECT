@@ -152,6 +152,9 @@ def delete_category(request, pk=None):
     messages.success(request, 'Category has been deleted successfully!')
     return redirect('menu_builder')
 
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
 def add_food(request):
     form = FoodItemForm()
     if request.method == "POST":
@@ -178,6 +181,7 @@ def add_food(request):
                 return render(request, "Vendor/add_food.html", {"form": form})
         else:
             print(form.errors)
+            form.fields['category'].queryset=Category.objects.filter(vendor=get_vendor(request))
     context = {
         'form': form,
     }

@@ -17,6 +17,15 @@
                 <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
                     <div class="user-dashboard loader-holder">
                         <div class="user-holder">
+                            {% if new_orders_count > 0 %}
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="border-left: 5px solid #ffb300; background-color: #fff9e6; color: #856404; margin-bottom: 25px;">
+                                <i class="fa fa-bell" style="margin-right: 8px; font-size: 1.2rem; vertical-align: middle;"></i>
+                                <strong>You have {{ new_orders_count }} new order(s) waiting for response!</strong> Click on order details below to accept and set estimated delivery times.
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            {% endif %}
                             <h5 class="text-uppercase">Overview</h5>
                             <p class="text-right">Logged in as: <b>{{ user.email }}</b></p>
                             <div class="row">

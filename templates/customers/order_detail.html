@@ -36,6 +36,88 @@
                                                 </div>
                                             </div>
                                             
+                                            <!-- Order Status & Delivery Time Tracker -->
+                                            <div class="row mt-4 mb-4">
+                                                <div class="col-md-12">
+                                                    <div class="card" style="border: 1px solid #e4e4e4; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); background-color: #fafafa;">
+                                                        <div class="card-body" style="padding: 20px;">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-md-6">
+                                                                    <h5 style="margin-bottom: 5px; font-weight: bold; color: #333;">Order Status: 
+                                                                        {% if order.status == 'New' %}
+                                                                            <span class="badge badge-warning" style="background-color: #ffc107; color: #212529; font-size: 0.95rem; padding: 6px 12px; border-radius: 4px;">Pending Approval</span>
+                                                                        {% elif order.status == 'Accepted' %}
+                                                                            <span class="badge badge-info" style="background-color: #17a2b8; color: #fff; font-size: 0.95rem; padding: 6px 12px; border-radius: 4px;">Accepted / Preparing</span>
+                                                                        {% elif order.status == 'Completed' %}
+                                                                            <span class="badge badge-success" style="background-color: #28a745; color: #fff; font-size: 0.95rem; padding: 6px 12px; border-radius: 4px;">Completed / Delivered</span>
+                                                                        {% else %}
+                                                                            <span class="badge badge-danger" style="background-color: #dc3545; color: #fff; font-size: 0.95rem; padding: 6px 12px; border-radius: 4px;">Cancelled</span>
+                                                                        {% endif %}
+                                                                    </h5>
+                                                                    <p class="text-muted" style="margin-bottom: 0;">Updated on: {{ order.updated_at }}</p>
+                                                                </div>
+                                                                <div class="col-md-6 text-md-right mt-3 mt-md-0">
+                                                                    <div style="display: inline-block; background-color: #fff; border: 1px solid #ddd; padding: 10px 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                                                                        <i class="fa fa-clock-o" style="color: #c30000; font-size: 1.4rem; margin-right: 8px; vertical-align: middle;"></i>
+                                                                        <span style="font-weight: 600; color: #555;">Estimated Delivery:</span>
+                                                                        <span style="font-weight: bold; color: #c30000; font-size: 1.1rem; margin-left: 5px;">
+                                                                            {% if order.status == 'Cancelled' %}
+                                                                                N/A
+                                                                            {% elif order.estimated_delivery_time %}
+                                                                                {{ order.estimated_delivery_time }} Mins
+                                                                            {% else %}
+                                                                                Awaiting preparation...
+                                                                            {% endif %}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {% if order.status != 'Cancelled' %}
+                                                            <!-- Progress Bar Tracker -->
+                                                            <hr style="border-top: 1px solid #ddd;">
+                                                            <div class="d-flex justify-content-between text-center position-relative mt-4 mb-2" style="padding: 0 10%;">
+                                                                <!-- Connecting Line background -->
+                                                                <div style="position: absolute; top: 15px; left: 15%; right: 15%; height: 4px; background-color: #ddd; z-index: 1;"></div>
+                                                                <!-- Connecting Line active -->
+                                                                <div style="position: absolute; top: 15px; left: 15%; height: 4px; background-color: #28a745; z-index: 2; width: {% if order.status == 'New' %}0%{% elif order.status == 'Accepted' %}50%{% else %}100%{% endif %}; transition: width 0.4s ease;"></div>
+                                                                
+                                                                <!-- Step 1: Placed -->
+                                                                <div style="z-index: 3;">
+                                                                    <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #28a745; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                                                        <i class="fa fa-check" style="font-size: 12px;"></i>
+                                                                    </div>
+                                                                    <div style="font-weight: 600; font-size: 0.85rem; margin-top: 8px; color: #28a745;">Order Placed</div>
+                                                                </div>
+                                                                <!-- Step 2: Preparing -->
+                                                                <div style="z-index: 3;">
+                                                                    <div style="width: 32px; height: 32px; border-radius: 50%; background-color: {% if order.status == 'Accepted' or order.status == 'Completed' %}#28a745{% else %}#ddd{% endif %}; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                                                        {% if order.status == 'Accepted' or order.status == 'Completed' %}
+                                                                            <i class="fa fa-check" style="font-size: 12px;"></i>
+                                                                        {% else %}
+                                                                            2
+                                                                        {% endif %}
+                                                                    </div>
+                                                                    <div style="font-weight: 600; font-size: 0.85rem; margin-top: 8px; color: {% if order.status == 'Accepted' or order.status == 'Completed' %}#28a745{% else %}#888{% endif %};">Preparing</div>
+                                                                </div>
+                                                                <!-- Step 3: Out for Delivery -->
+                                                                <div style="z-index: 3;">
+                                                                    <div style="width: 32px; height: 32px; border-radius: 50%; background-color: {% if order.status == 'Completed' %}#28a745{% else %}#ddd{% endif %}; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                                                        {% if order.status == 'Completed' %}
+                                                                            <i class="fa fa-check" style="font-size: 12px;"></i>
+                                                                        {% else %}
+                                                                            3
+                                                                        {% endif %}
+                                                                    </div>
+                                                                    <div style="font-weight: 600; font-size: 0.85rem; margin-top: 8px; color: {% if order.status == 'Completed' %}#28a745{% else %}#888{% endif %};">Delivered</div>
+                                                                </div>
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <h6>Hello {{ order.name }}, </h6><span>Review your order details below.</span>
                                             <hr>
                             

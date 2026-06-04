@@ -36,6 +36,41 @@
                                                 </div>
                                             </div>
                                             
+                                            <div class="row mt-4 mb-4">
+                                                <div class="col-md-12">
+                                                    <div class="card" style="border: 1px solid #e4e4e4; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                                        <div class="card-header" style="background-color: #f7f7f7; font-weight: bold; border-bottom: 1px solid #e4e4e4; padding: 12px 20px;">
+                                                            <i class="fa fa-cogs" style="margin-right: 8px;"></i> Manage Order Status & Delivery Time
+                                                        </div>
+                                                        <div class="card-body" style="padding: 20px;">
+                                                            <form action="{% url 'vendor_order_detail' order.order_number %}" method="POST">
+                                                                {% csrf_token %}
+                                                                <div class="form-row align-items-center">
+                                                                    <div class="col-md-4 mb-3">
+                                                                        <label for="orderStatus" style="font-weight: 600; display: block; margin-bottom: 6px;">Order Status</label>
+                                                                        <select name="status" class="form-control" id="orderStatus" style="height: 42px; border-radius: 4px;">
+                                                                            <option value="New" {% if order.status == 'New' %}selected{% endif %}>New</option>
+                                                                            <option value="Accepted" {% if order.status == 'Accepted' %}selected{% endif %}>Accepted</option>
+                                                                            <option value="Completed" {% if order.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                                                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-md-4 mb-3">
+                                                                        <label for="deliveryTime" style="font-weight: 600; display: block; margin-bottom: 6px;">Estimated Delivery Time (Mins)</label>
+                                                                        <input type="number" name="estimated_delivery_time" class="form-control" id="deliveryTime" min="1" max="240" placeholder="e.g. 30" value="{{ order.estimated_delivery_time|default_if_none:'' }}" style="height: 42px; border-radius: 4px;">
+                                                                    </div>
+                                                                    <div class="col-md-4 mb-3" style="margin-top: 24px;">
+                                                                        <button type="submit" class="btn btn-danger btn-block" style="height: 42px; font-weight: bold; background-color: #c30000; border-color: #c30000; border-radius: 4px;">
+                                                                            Update Order
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <h6>Hello {{ order.name }}, </h6><span>Review your order details below.</span>
                                             <hr>
                             

@@ -205,12 +205,16 @@ def vendorDashboard(request):
     total_revenue = 0
     for i in orders:
         total_revenue += i.get_total_by_vendor()['grand_total']
+
+    new_orders_count = orders.filter(status='New').count()
+
     context = {
         'orders': orders,
         'orders_count': orders.count(),
         'recent_orders': recent_orders,
         'total_revenue': total_revenue,
         'current_month_revenue': current_month_revenue,
+        'new_orders_count': new_orders_count,
     }
     return render(request, 'accounts/vendorDashboard.html', context)
 

@@ -250,6 +250,22 @@ def order_detail(request, order_number):
         order = Order.objects.get(order_number=order_number, is_ordered=True)
         ordered_food = OrderedFood.objects.filter(order=order, fooditem__vendor=get_vendor(request))
 
+        if request.method == 'POST':
+            status = request.POST.get('status')
+            estimated_delivery_time = request.POST.get('estimated_delivery_time')
+            if status in dict(Order.STATUS):
+                order.status = status
+            if estimated_delivery_time:
+                try:
+                    order.estimated_delivery_time = int(estimated_delivery_time)
+                except ValueError:
+                    order.estimated_delivery_time = None
+            else:
+                order.estimated_delivery_time = None
+            order.save()
+            messages.success(request, f'Order status updated to {status}.')
+            return redirect('vendor_order_detail', order_number=order.order_number)
+
         context = {
             'order': order,
             'ordered_food': ordered_food,
@@ -257,7 +273,8 @@ def order_detail(request, order_number):
             'tax_data': order.get_total_by_vendor()['tax_dict'],
             'grand_total': order.get_total_by_vendor()['grand_total'],
         }
-    except:
+    except Exception as e:
+        print(e)
         return redirect('vendor')
     return render(request, 'vendor/order_detail.html', context)
 

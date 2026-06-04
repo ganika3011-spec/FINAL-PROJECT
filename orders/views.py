@@ -100,8 +100,15 @@ def place_order(request):
                     "key2": "value2"
                 }
             }
-            rzp_order = client.order.create(data=DATA)
-            rzp_order_id = rzp_order['id']
+            try:
+                rzp_order = client.order.create(data=DATA)
+                rzp_order_id = rzp_order['id']
+            except Exception as e:
+                from django.conf import settings
+                if settings.DEBUG:
+                    rzp_order_id = f"fake_order_{order.order_number}"
+                else:
+                    raise e
 
             context = {
                 'order': order,
@@ -199,7 +206,7 @@ def payments(request):
                 send_notification(mail_subject, mail_template, context)
 
         # CLEAR THE CART IF THE PAYMENT IS SUCCESS
-        # cart_items.delete() 
+        cart_items.delete() 
 
         # RETURN BACK TO AJAX WITH THE STATUS SUCCESS OR FAILURE
         response = {

@@ -32,10 +32,107 @@
                     <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                         <div class="login-option">
                             {% if user.is_authenticated %}
-                            <a href="{% url 'cart' %}">
-                                <i class="fa fa-shopping-cart text-danger" style="font-size: 20px;"></i>
-                                <span class="badge badge-warning" id="cart_counter" style="border-radius: 50px; position: relative; bottom:10px; left: -5px;">{{ cart_count }}</span>
-                            </a>
+                                {% if user.role == 2 %}
+                                <!-- Customer Notification Bell Dropdown -->
+                                <div class="dropdown" style="display: inline-block; margin-right: 15px; vertical-align: middle;">
+                                    <a href="#" class="dropdown-toggle" id="customerNotificationBell" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="position: relative; text-decoration: none;">
+                                        <i class="fa fa-bell text-danger" style="font-size: 20px;"></i>
+                                        {% if customer_notifications_count > 0 %}
+                                        <span class="badge badge-warning" style="border-radius: 50px; position: absolute; top: -10px; right: 10px; font-size: 10px; padding: 3px 6px;">{{ customer_notifications_count }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="customerNotificationBell" style="width: 320px; max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0; margin-top: 10px; z-index: 1050;">
+                                        <div style="background-color: #f8f9fa; border-bottom: 1px solid #eee; padding: 12px 15px; font-weight: bold; font-size: 0.95rem; color: #333;">
+                                            <i class="fa fa-bell-o" style="margin-right: 6px;"></i> Order Updates
+                                        </div>
+                                        <div class="dropdown-items-container">
+                                            {% if customer_active_orders %}
+                                                {% for order in customer_active_orders %}
+                                                <a class="dropdown-item" href="{% url 'order_detail' order.order_number %}" style="display: block; padding: 12px 15px; border-bottom: 1px solid #f1f1f1; text-decoration: none; color: #444; transition: background-color 0.2s;">
+                                                    <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; color: {% if order.status == 'Completed' %}#28a745{% elif order.status == 'Accepted' %}#17a2b8{% elif order.status == 'Cancelled' %}#dc3545{% else %}#ffc107{% endif %};">
+                                                        {% if order.status == 'New' %}
+                                                            <i class="fa fa-clock-o" style="margin-right: 5px;"></i> Order #{{ order.order_number }} Pending
+                                                        {% elif order.status == 'Accepted' %}
+                                                            <i class="fa fa-check" style="margin-right: 5px;"></i> Order #{{ order.order_number }} Accepted!
+                                                        {% elif order.status == 'Completed' %}
+                                                            <i class="fa fa-check-circle" style="margin-right: 5px;"></i> Order #{{ order.order_number }} Completed!
+                                                        {% else %}
+                                                            <i class="fa fa-times" style="margin-right: 5px;"></i> Order #{{ order.order_number }} Cancelled
+                                                        {% endif %}
+                                                    </div>
+                                                    <div style="font-size: 0.8rem; color: #555; margin-bottom: 2px;">
+                                                        {% if order.status == 'Accepted' and order.estimated_delivery_time %}
+                                                            Estimated Delivery: <strong>{{ order.estimated_delivery_time }} Mins</strong>
+                                                        {% elif order.status == 'New' %}
+                                                            Awaiting preparation time...
+                                                        {% elif order.status == 'Completed' %}
+                                                            Enjoy your meal!
+                                                        {% else %}
+                                                            This order was cancelled.
+                                                        {% endif %}
+                                                    </div>
+                                                    <div style="font-size: 0.75rem; color: #888; text-align: right;">
+                                                        {{ order.updated_at|timesince }} ago
+                                                    </div>
+                                                </a>
+                                                {% endfor %}
+                                                <div style="padding: 10px; text-align: center; background-color: #fff;">
+                                                    <a href="{% url 'myAccount' %}" style="font-size: 0.85rem; color: #c30000; font-weight: bold; text-decoration: none;">View Dashboard</a>
+                                                </div>
+                                            {% else %}
+                                                <div style="padding: 30px 15px; text-align: center; color: #777; font-size: 0.9rem;">
+                                                    <i class="fa fa-info-circle text-info" style="font-size: 2.2rem; display: block; margin-bottom: 10px;"></i>
+                                                    No active orders found.
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="{% url 'cart' %}" style="margin-right: 15px; vertical-align: middle;">
+                                    <i class="fa fa-shopping-cart text-danger" style="font-size: 20px;"></i>
+                                    <span class="badge badge-warning" id="cart_counter" style="border-radius: 50px; position: relative; bottom:10px; left: -5px;">{{ cart_count }}</span>
+                                </a>
+                                {% elif user.role == 1 %}
+                                <!-- Vendor Notification Bell Dropdown -->
+                                <div class="dropdown" style="display: inline-block; margin-right: 15px; vertical-align: middle;">
+                                    <a href="#" class="dropdown-toggle" id="vendorNotificationBell" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="position: relative; text-decoration: none;">
+                                        <i class="fa fa-bell text-danger" style="font-size: 20px;"></i>
+                                        {% if new_orders_count > 0 %}
+                                        <span class="badge badge-warning" style="border-radius: 50px; position: absolute; top: -10px; right: 10px; font-size: 10px; padding: 3px 6px;">{{ new_orders_count }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="vendorNotificationBell" style="width: 320px; max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0; margin-top: 10px; z-index: 1050;">
+                                        <div style="background-color: #f8f9fa; border-bottom: 1px solid #eee; padding: 12px 15px; font-weight: bold; font-size: 0.95rem; color: #333;">
+                                            <i class="fa fa-bell-o" style="margin-right: 6px;"></i> Notifications
+                                        </div>
+                                        <div class="dropdown-items-container">
+                                            {% if new_orders_count > 0 %}
+                                                {% for new_order in new_orders_list %}
+                                                <a class="dropdown-item" href="{% url 'vendor_order_detail' new_order.order_number %}" style="display: block; padding: 12px 15px; border-bottom: 1px solid #f1f1f1; text-decoration: none; color: #444; transition: background-color 0.2s;">
+                                                    <div style="font-weight: 600; font-size: 0.85rem; color: #28a745; margin-bottom: 2px;">
+                                                        <i class="fa fa-shopping-basket" style="margin-right: 5px;"></i> New Order #{{ new_order.order_number }}
+                                                    </div>
+                                                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 2px;">
+                                                        From: <strong>{{ new_order.name }}</strong>
+                                                    </div>
+                                                    <div style="font-size: 0.75rem; color: #888; text-align: right;">
+                                                        {{ new_order.created_at|timesince }} ago
+                                                    </div>
+                                                </a>
+                                                {% endfor %}
+                                                <div style="padding: 10px; text-align: center; background-color: #fff;">
+                                                    <a href="{% url 'vendor' %}" style="font-size: 0.85rem; color: #c30000; font-weight: bold; text-decoration: none;">View All Orders</a>
+                                                </div>
+                                            {% else %}
+                                                <div style="padding: 30px 15px; text-align: center; color: #777; font-size: 0.9rem;">
+                                                    <i class="fa fa-check-circle-o text-success" style="font-size: 2.2rem; display: block; margin-bottom: 10px;"></i>
+                                                    All orders processed!
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
                             {% endif %}
                             <a href="{% url 'marketplace' %}" class="btn btn-outline-danger text-uppercase font-weight-bold">Marketplace</a>
                             {% if user.is_authenticated %}
@@ -56,6 +153,31 @@
     <!-- Header End -->
 
     <script>
+    $(document).ready(function() {
+        $('.dropdown-toggle').on('click', function(e) {
+            e.preventDefault();
+            var $dropdownMenu = $(this).siblings('.dropdown-menu');
+            var isShown = $dropdownMenu.hasClass('show');
+            
+            // Close all dropdowns
+            $('.dropdown-menu').removeClass('show');
+            $('.dropdown-toggle').attr('aria-expanded', 'false');
+            
+            if (!isShown) {
+                $dropdownMenu.addClass('show');
+                $(this).attr('aria-expanded', 'true');
+            }
+        });
+
+        // Close when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.dropdown').length) {
+                $('.dropdown-menu').removeClass('show');
+                $('.dropdown-toggle').attr('aria-expanded', 'false');
+            }
+        });
+    });
+
     var x = document.getElementById("location");
     var current_location = sessionStorage.getItem("current_location")
     if(current_location != ""){

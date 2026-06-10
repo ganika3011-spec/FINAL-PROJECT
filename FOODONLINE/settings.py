@@ -80,6 +80,8 @@ TEMPLATES = [
                 'marketplace.context_processors.get_cart_amounts',
                 'accounts.context_processors.get_user_profile',
                 'accounts.context_processors.get_paypal_client_id',
+                'accounts.context_processors.get_vendor_notifications',
+                'accounts.context_processors.get_customer_notifications',
             ],
         },
     },

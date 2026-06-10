@@ -25,18 +25,20 @@ class Vendor(models.Model):
         
         current_opening_hours = OpeningHour.objects.filter(vendor=self, day=today)
         now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
+        current_time = now.time()
 
         is_open = None
         for i in current_opening_hours:
             if not i.is_closed:
-                start = str(datetime.strptime(i.from_hour, "%I:%M %p").time())
-                end = str(datetime.strptime(i.to_hour, "%I:%M %p").time())
+                start = datetime.strptime(i.from_hour, "%I:%M %p").time()
+                end = datetime.strptime(i.to_hour, "%I:%M %p").time()
+                print(f"DEBUG is_open: Current Time: {current_time}, Start: {start}, End: {end}")
                 if current_time > start and current_time < end:
                     is_open = True
                     break
                 else:
                     is_open = False
+        print(f"DEBUG is_open: Returning {is_open} for Vendor {self.vendor_name}")
         return is_open
 
     def save(self, *args, **kwargs):

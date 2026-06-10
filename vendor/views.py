@@ -287,3 +287,81 @@ def my_orders(request):
         'orders': orders,
     }
     return render(request, 'vendor/my_orders.html', context)
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def vendor_analytics(request):
+    from django.db.models import Sum
+    from datetime import datetime
+
+    vendor = get_vendor(request)
+    orders = Order.objects.filter(vendors__in=[vendor.id], is_ordered=True)
+
+    # Order counts by status
+    total_orders_count = orders.count()
+    new_orders_count = orders.filter(status='New').count()
+    accepted_orders_count = orders.filter(status='Accepted').count()
+    completed_orders_count = orders.filter(status='Completed').count()
+    cancelled_orders_count = orders.filter(status='Cancelled').count()
+
+    # Sales calculation (by vendor share)
+    total_sales = 0.0
+    completed_sales = 0.0
+    active_sales = 0.0
+    pending_sales = 0.0
+    cancelled_sales = 0.0
+
+    for order in orders:
+        vendor_total = order.get_total_by_vendor()['grand_total']
+        total_sales += vendor_total
+        if order.status == 'Completed':
+            completed_sales += vendor_total
+        elif order.status == 'Accepted':
+            active_sales += vendor_total
+        elif order.status == 'New':
+            pending_sales += vendor_total
+        elif order.status == 'Cancelled':
+            cancelled_sales += vendor_total
+
+    # Sales by month (for the current year)
+    current_year = datetime.now().year
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    monthly_sales = {m: 0.0 for m in months}
+
+    for order in orders.filter(status='Completed', created_at__year=current_year):
+        month_name = order.created_at.strftime('%b')
+        if month_name in monthly_sales:
+            monthly_sales[month_name] += order.get_total_by_vendor()['grand_total']
+
+    monthly_sales_list = [{'month': m, 'sales': monthly_sales[m]} for m in months]
+    max_sales = max([m['sales'] for m in monthly_sales_list] + [1.0])
+
+    # Top selling items
+    top_selling_items = OrderedFood.objects.filter(
+        fooditem__vendor=vendor,
+        order__is_ordered=True,
+        order__status='Completed'
+    ).values('fooditem__food_title').annotate(
+        total_qty=Sum('quantity'),
+        total_revenue=Sum('amount')
+    ).order_by('-total_qty')[:5]
+
+    context = {
+        'total_orders_count': total_orders_count,
+        'new_orders_count': new_orders_count,
+        'accepted_orders_count': accepted_orders_count,
+        'completed_orders_count': completed_orders_count,
+        'cancelled_orders_count': cancelled_orders_count,
+        
+        'total_sales': total_sales,
+        'completed_sales': completed_sales,
+        'active_sales': active_sales,
+        'pending_sales': pending_sales,
+        'cancelled_sales': cancelled_sales,
+
+        'monthly_sales': monthly_sales_list,
+        'max_sales': max_sales,
+        'top_selling_items': top_selling_items,
+    }
+    return render(request, 'vendor/analytics.html', context)
